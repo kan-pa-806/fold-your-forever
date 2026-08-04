@@ -1,0 +1,129 @@
+import { useRef, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+
+export function WaxSeal({ onSealed }: { onSealed: () => void }) {
+  const targetRef = useRef<HTMLDivElement>(null);
+  const [sealed, setSealed] = useState(false);
+  const [dragging, setDragging] = useState(false);
+
+  const place = () => {
+    if (sealed) return;
+    setSealed(true);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(18);
+    setTimeout(onSealed, 900);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-8 py-6">
+      {/* envelope */}
+      <motion.div
+        animate={sealed ? { rotate: [0, -0.8, 0.6, 0], y: [0, 2, 0] } : {}}
+        transition={{ duration: 0.45 }}
+        className="paper grain relative h-[190px] w-[268px] rounded-[10px] border border-white/60"
+        style={{ boxShadow: "0 26px 50px -30px rgba(47,43,39,.9)" }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-[52%]"
+          style={{
+            background: "linear-gradient(180deg, rgba(255,255,255,.65), rgba(47,43,39,.07))",
+            clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+          }}
+        />
+        <div
+          ref={targetRef}
+          className="absolute left-1/2 top-[48%] grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-dashed border-ink/20"
+        >
+          <AnimatePresence>
+            {sealed ? (
+              <motion.div
+                initial={{ scale: 1.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 220, damping: 14 }}
+              >
+                <Stamp />
+              </motion.div>
+            ) : (
+              <span className="text-[10px] tracking-widest text-ink-soft">HERE</span>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      {!sealed ? (
+        <div className="glass w-full max-w-[300px] rounded-3xl p-4 text-center">
+          <p className="text-[11px] tracking-widest text-ink-soft">WAX TRAY</p>
+          <div className="mt-3 flex items-center justify-center gap-5">
+            <motion.button
+              type="button"
+              drag
+              dragSnapToOrigin
+              whileDrag={{ scale: 1.12, rotate: -6 }}
+              onDragStart={() => setDragging(true)}
+              onDragEnd={(_, info) => {
+                setDragging(false);
+                const rect = targetRef.current?.getBoundingClientRect();
+                if (!rect) return;
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const d = Math.hypot(info.point.x - cx, info.point.y - cy);
+                if (d < 90) place();
+              }}
+              onClick={place}
+              aria-label="Place the wax seal on the envelope"
+              className="cursor-grab touch-none active:cursor-grabbing"
+            >
+              <Stamp />
+            </motion.button>
+            <motion.button
+              type="button"
+              drag
+              dragSnapToOrigin
+              whileDrag={{ scale: 1.12, rotate: 6 }}
+              onDragEnd={(_, info) => {
+                const rect = targetRef.current?.getBoundingClientRect();
+                if (!rect) return;
+                const d = Math.hypot(
+                  info.point.x - (rect.left + rect.width / 2),
+                  info.point.y - (rect.top + rect.height / 2),
+                );
+                if (d < 90) place();
+              }}
+              onClick={place}
+              aria-label="Place the heart wax seal on the envelope"
+              className="cursor-grab touch-none active:cursor-grabbing"
+            >
+              <Stamp glyph="♡" />
+            </motion.button>
+          </div>
+          <p className="mt-3 text-xs text-ink-soft">
+            {dragging ? "Almost there…" : "Drag a seal onto the envelope — or tap it."}
+          </p>
+        </div>
+      ) : (
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="font-display text-2xl text-ink"
+        >
+          Sealed for your person.
+        </motion.p>
+      )}
+    </div>
+  );
+}
+
+function Stamp({ glyph = "11" }: { glyph?: string }) {
+  return (
+    <span
+      className="font-display grid h-14 w-14 place-items-center rounded-full text-lg tracking-widest text-parchment"
+      style={{
+        background: "radial-gradient(circle at 32% 28%, oklch(0.62 0.15 27), oklch(0.44 0.13 25))",
+        boxShadow:
+          "inset 0 2px 6px rgba(255,255,255,.35), inset 0 -4px 10px rgba(0,0,0,.35), 0 10px 20px -12px rgba(47,43,39,.9)",
+      }}
+    >
+      {glyph}
+    </span>
+  );
+}
