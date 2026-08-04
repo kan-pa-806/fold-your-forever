@@ -63,7 +63,7 @@ export function ScratchCard({ children, onRevealed, revealed = false }: Props) {
     ctx.arc(clientX - rect.left, clientY - rect.top, 26, 0, Math.PI * 2);
     ctx.fill();
     checks.current++;
-    if (checks.current % 8 === 0 && progress() > 0.42) finish();
+    if (checks.current % 6 === 0 && progress() > 0.34) finish();
   };
 
   const finish = () => {
