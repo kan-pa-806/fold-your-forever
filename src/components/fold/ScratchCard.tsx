@@ -81,10 +81,11 @@ export function ScratchCard({ children, onRevealed, revealed = false }: Props) {
   }
 
   return (
-    <div ref={wrapRef} className="relative overflow-hidden rounded-[26px]">
-      <div aria-hidden className="pointer-events-none select-none blur-[2px]">
+    <div ref={wrapRef} className="relative h-[240px] overflow-hidden rounded-[26px]">
+      <div aria-hidden className="pointer-events-none h-full select-none overflow-hidden blur-[3px]">
         {children}
       </div>
+
       <canvas
         ref={canvasRef}
         className="absolute inset-0 h-full w-full touch-none"
