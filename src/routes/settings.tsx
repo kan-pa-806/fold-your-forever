@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
 import { Logo } from "@/components/fold/Logo";
-import { EnvelopeHistory } from "@/components/fold/EnvelopeHistory";
+
 
 import { FoldButton } from "@/components/fold/FoldButton";
 import { resetSpace, updatePrefs, useFold, type Prefs } from "@/lib/fold-store";
