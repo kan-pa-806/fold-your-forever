@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { formatDay, type Capsule } from "@/lib/fold-store";
 
@@ -36,7 +37,9 @@ export function EnvelopeHistory({
   empty: string;
   bare?: boolean;
 }) {
-  const groups = group(capsules);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const groups = mounted ? group(capsules) : [];
 
   return (
     <section className={bare ? "mt-3" : "mt-7"}>

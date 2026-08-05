@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
 import { Logo } from "@/components/fold/Logo";
-import { EnvelopeHistory } from "@/components/fold/EnvelopeHistory";
+
 
 import { FoldButton } from "@/components/fold/FoldButton";
 import { resetSpace, updatePrefs, useFold, type Prefs } from "@/lib/fold-store";
@@ -80,7 +79,7 @@ function Toggle({
 
 function SettingsPage() {
   const state = useFold();
-  const [tab, setTab] = useState<"sent" | "received">("sent");
+  
 
   return (
     <AppShell>
@@ -104,39 +103,31 @@ function SettingsPage() {
           <Row label="Capsule history" value={`${state.capsules.length} folded`} />
         </Section>
 
-        <section className="mt-7">
-          <p className="text-[11px] tracking-[0.22em] text-ink-soft">ENVELOPE HISTORY</p>
-          <div className="glass mt-3 flex gap-1 rounded-full p-1">
-            {(["sent", "received"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setTab(t)}
-                aria-pressed={tab === t}
-                className={`press flex-1 rounded-full py-2 text-[12px] tracking-[0.12em] transition-colors ${
-                  tab === t ? "bg-coral text-parchment" : "text-ink-soft"
-                }`}
-              >
-                {t === "sent" ? "SENT" : "RECEIVED"} ·{" "}
-                {state.capsules.filter((c) => (t === "sent" ? c.author === "me" : c.author === "partner")).length}
-              </button>
-            ))}
-          </div>
+        <Section title="ENVELOPE HISTORY">
+          <Link
+            to="/history/$box"
+            params={{ box: "sent" }}
+            className="flex min-h-[56px] items-center justify-between py-3 text-sm text-ink"
+          >
+            <span>Sent envelopes by me</span>
+            <span className="flex items-center gap-2 text-ink-soft">
+              {state.capsules.filter((c) => c.author === "me").length}
+              <ChevronRight size={16} />
+            </span>
+          </Link>
+          <Link
+            to="/history/$box"
+            params={{ box: "received" }}
+            className="flex min-h-[56px] items-center justify-between py-3 text-sm text-ink"
+          >
+            <span>Received envelopes</span>
+            <span className="flex items-center gap-2 text-ink-soft">
+              {state.capsules.filter((c) => c.author === "partner").length}
+              <ChevronRight size={16} />
+            </span>
+          </Link>
+        </Section>
 
-          {tab === "sent" ? (
-            <EnvelopeHistory
-              bare
-              capsules={state.capsules.filter((c) => c.author === "me")}
-              empty="You haven't folded anything yet."
-            />
-          ) : (
-            <EnvelopeHistory
-              bare
-              capsules={state.capsules.filter((c) => c.author === "partner")}
-              empty="Nothing from your person yet."
-            />
-          )}
-        </section>
 
 
 

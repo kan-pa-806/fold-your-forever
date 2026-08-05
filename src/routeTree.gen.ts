@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VaultRouteImport } from './routes/vault'
+import { Route as HistoryBoxRouteImport } from './routes/history.$box'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const VaultRoute = VaultRouteImport.update({
   path: '/vault',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoryBoxRoute = HistoryBoxRouteImport.update({
+  id: '/history/$box',
+  path: '/history/$box',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
   '/settings': typeof SettingsRoute
   '/vault': typeof VaultRoute
+  '/history/$box': typeof HistoryBoxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
   '/settings': typeof SettingsRoute
   '/vault': typeof VaultRoute
+  '/history/$box': typeof HistoryBoxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/create': typeof CreateRoute
   '/settings': typeof SettingsRoute
   '/vault': typeof VaultRoute
+  '/history/$box': typeof HistoryBoxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/create' | '/settings' | '/vault'
+  fullPaths: '/' | '/create' | '/settings' | '/vault' | '/history/$box'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/create' | '/settings' | '/vault'
-  id: '__root__' | '/' | '/create' | '/settings' | '/vault'
+  to: '/' | '/create' | '/settings' | '/vault' | '/history/$box'
+  id: '__root__' | '/' | '/create' | '/settings' | '/vault' | '/history/$box'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   CreateRoute: typeof CreateRoute
   SettingsRoute: typeof SettingsRoute
   VaultRoute: typeof VaultRoute
+  HistoryBoxRoute: typeof HistoryBoxRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VaultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/history/$box': {
+      id: '/history/$box'
+      path: '/history/$box'
+      fullPath: '/history/$box'
+      preLoaderRoute: typeof HistoryBoxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateRoute: CreateRoute,
   SettingsRoute: SettingsRoute,
   VaultRoute: VaultRoute,
+  HistoryBoxRoute: HistoryBoxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
