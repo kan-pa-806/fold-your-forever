@@ -106,7 +106,7 @@ export function WaxSeal({ onSealed }: { onSealed: () => void }) {
                 onDragStart={() => setDragging(true)}
                 onDragEnd={(_, info) => {
                   setDragging(false);
-                  if (isNearTarget(info.point)) place(glyph, info.point);
+                  if (isNearTarget(info.point)) place(glyph);
                 }}
                 onClick={() => place(glyph)}
                 aria-label={`Place the ${glyph} wax seal on the envelope`}
