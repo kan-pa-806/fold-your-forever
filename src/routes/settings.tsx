@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
@@ -79,6 +80,7 @@ function Toggle({
 
 function SettingsPage() {
   const state = useFold();
+  const [tab, setTab] = useState<"sent" | "received">("sent");
 
   return (
     <AppShell>
