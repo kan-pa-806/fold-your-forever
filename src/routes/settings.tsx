@@ -3,6 +3,8 @@ import { ChevronRight } from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
 import { Logo } from "@/components/fold/Logo";
+import { EnvelopeHistory } from "@/components/fold/EnvelopeHistory";
+
 import { FoldButton } from "@/components/fold/FoldButton";
 import { resetSpace, updatePrefs, useFold, type Prefs } from "@/lib/fold-store";
 
@@ -99,6 +101,19 @@ function SettingsPage() {
           </Link>
           <Row label="Capsule history" value={`${state.capsules.length} folded`} />
         </Section>
+
+        <EnvelopeHistory
+          title="SENT ENVELOPES BY ME"
+          capsules={state.capsules.filter((c) => c.author === "me")}
+          empty="You haven't folded anything yet."
+        />
+
+        <EnvelopeHistory
+          title={`RECEIVED ENVELOPES BY ${state.partner.toUpperCase()}`}
+          capsules={state.capsules.filter((c) => c.author === "partner")}
+          empty="Nothing from your person yet."
+        />
+
 
         <Section title="PREFERENCES">
           <Toggle label="Notifications" name="notifications" checked={state.prefs.notifications} />
