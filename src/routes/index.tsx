@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "11:FOLD — Fold today into forever" },
       {
         property: "og:description",
-        content: "A private digital love-letter ritual for couples. Capture, fold, seal, reveal.",
+        content: "A private space for two. Capture a photo, a whisper and a handwritten note, fold it into a letter and seal it for your person.",
       },
     ],
   }),

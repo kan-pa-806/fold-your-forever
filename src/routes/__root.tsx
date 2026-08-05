@@ -80,6 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "11:FOLD" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { title: "11:FOLD — Fold today into forever" },
+      { property: "og:title", content: "11:FOLD — Fold today into forever" },
+      { name: "twitter:title", content: "11:FOLD — Fold today into forever" },
+      { name: "description", content: "A private space for two. Capture a photo, a whisper and a handwritten note, fold it into a letter and seal it for your person." },
+      { property: "og:description", content: "A private space for two. Capture a photo, a whisper and a handwritten note, fold it into a letter and seal it for your person." },
+      { name: "twitter:description", content: "A private space for two. Capture a photo, a whisper and a handwritten note, fold it into a letter and seal it for your person." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f6d2ab9d-2a92-4a75-80e5-73f1c01891fa/id-preview-9cb820cb--a078a10e-d686-49a9-adc1-b12260e80e65.lovable.app-1785866041831.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f6d2ab9d-2a92-4a75-80e5-73f1c01891fa/id-preview-9cb820cb--a078a10e-d686-49a9-adc1-b12260e80e65.lovable.app-1785866041831.png" },
     ],
     links: [
       {
