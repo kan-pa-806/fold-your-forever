@@ -13,22 +13,17 @@ export function WaxSeal({ onSealed }: { onSealed: () => void }) {
   const [dragging, setDragging] = useState(false);
   const [done, setDone] = useState(false);
 
-  const place = (glyph: string, point?: { x: number; y: number }) => {
+  const place = (glyph: string) => {
     if (done) return;
-    const rect = targetRef.current?.getBoundingClientRect();
-    let x = 0;
-    let y = 0;
-    if (rect && point) {
-      x = Math.max(-34, Math.min(34, point.x - (rect.left + rect.width / 2)));
-      y = Math.max(-26, Math.min(26, point.y - (rect.top + rect.height / 2)));
-    } else {
-      const i = placed.length;
-      x = ((i % 3) - 1) * 20;
-      y = (Math.floor(i / 3) % 2 === 0 ? -1 : 1) * 14 * (i > 2 ? 1 : 0);
-    }
+    // seals always snap neatly onto the dotted target; extras fan out a touch
+    const i = placed.length;
+    const ring = i === 0 ? 0 : 22;
+    const angle = (i - 1) * (Math.PI / 3);
+    const x = i === 0 ? 0 : Math.round(Math.cos(angle) * ring);
+    const y = i === 0 ? 0 : Math.round(Math.sin(angle) * ring);
     setPlaced((prev) => [
       ...prev,
-      { id: Date.now() + Math.random(), glyph, x, y, rotate: (Math.random() - 0.5) * 24 },
+      { id: Date.now() + Math.random(), glyph, x, y, rotate: i === 0 ? 0 : (i % 2 ? 8 : -8) },
     ]);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(18);
   };
