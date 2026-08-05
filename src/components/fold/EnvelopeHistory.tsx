@@ -29,19 +29,23 @@ export function EnvelopeHistory({
   title,
   capsules,
   empty,
+  bare,
 }: {
-  title: string;
+  title?: string;
   capsules: Capsule[];
   empty: string;
+  bare?: boolean;
 }) {
   const groups = group(capsules);
 
   return (
-    <section className="mt-7">
-      <div className="flex items-baseline justify-between">
-        <p className="text-[11px] tracking-[0.22em] text-ink-soft">{title}</p>
-        <span className="text-[11px] text-ink-soft">{capsules.length}</span>
-      </div>
+    <section className={bare ? "mt-3" : "mt-7"}>
+      {!bare && (
+        <div className="flex items-baseline justify-between">
+          <p className="text-[11px] tracking-[0.22em] text-ink-soft">{title}</p>
+          <span className="text-[11px] text-ink-soft">{capsules.length}</span>
+        </div>
+      )}
 
       {groups.length === 0 ? (
         <div className="glass mt-3 rounded-[24px] px-4 py-5 text-sm text-ink-soft">{empty}</div>

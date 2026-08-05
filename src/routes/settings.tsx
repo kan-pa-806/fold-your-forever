@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
@@ -79,6 +80,7 @@ function Toggle({
 
 function SettingsPage() {
   const state = useFold();
+  const [tab, setTab] = useState<"sent" | "received">("sent");
 
   return (
     <AppShell>
@@ -102,17 +104,40 @@ function SettingsPage() {
           <Row label="Capsule history" value={`${state.capsules.length} folded`} />
         </Section>
 
-        <EnvelopeHistory
-          title="SENT ENVELOPES BY ME"
-          capsules={state.capsules.filter((c) => c.author === "me")}
-          empty="You haven't folded anything yet."
-        />
+        <section className="mt-7">
+          <p className="text-[11px] tracking-[0.22em] text-ink-soft">ENVELOPE HISTORY</p>
+          <div className="glass mt-3 flex gap-1 rounded-full p-1">
+            {(["sent", "received"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                aria-pressed={tab === t}
+                className={`press flex-1 rounded-full py-2 text-[12px] tracking-[0.12em] transition-colors ${
+                  tab === t ? "bg-coral text-parchment" : "text-ink-soft"
+                }`}
+              >
+                {t === "sent" ? "SENT" : "RECEIVED"} ·{" "}
+                {state.capsules.filter((c) => (t === "sent" ? c.author === "me" : c.author === "partner")).length}
+              </button>
+            ))}
+          </div>
 
-        <EnvelopeHistory
-          title={`RECEIVED ENVELOPES BY ${state.partner.toUpperCase()}`}
-          capsules={state.capsules.filter((c) => c.author === "partner")}
-          empty="Nothing from your person yet."
-        />
+          {tab === "sent" ? (
+            <EnvelopeHistory
+              bare
+              capsules={state.capsules.filter((c) => c.author === "me")}
+              empty="You haven't folded anything yet."
+            />
+          ) : (
+            <EnvelopeHistory
+              bare
+              capsules={state.capsules.filter((c) => c.author === "partner")}
+              empty="Nothing from your person yet."
+            />
+          )}
+        </section>
+
 
 
         <Section title="PREFERENCES">
