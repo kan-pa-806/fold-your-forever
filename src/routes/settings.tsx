@@ -100,6 +100,19 @@ function SettingsPage() {
           <Row label="Capsule history" value={`${state.capsules.length} folded`} />
         </Section>
 
+        <EnvelopeHistory
+          title="SENT ENVELOPES BY ME"
+          capsules={state.capsules.filter((c) => c.author === "me")}
+          empty="You haven't folded anything yet."
+        />
+
+        <EnvelopeHistory
+          title={`RECEIVED ENVELOPES BY ${state.partner.toUpperCase()}`}
+          capsules={state.capsules.filter((c) => c.author === "partner")}
+          empty="Nothing from your person yet."
+        />
+
+
         <Section title="PREFERENCES">
           <Toggle label="Notifications" name="notifications" checked={state.prefs.notifications} />
           <Toggle label="Sound" name="sound" checked={state.prefs.sound} />
