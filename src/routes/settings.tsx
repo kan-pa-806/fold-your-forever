@@ -79,7 +79,7 @@ function Toggle({
 
 function SettingsPage() {
   const state = useFold();
-  const [tab, setTab] = useState<"sent" | "received">("sent");
+  
 
   return (
     <AppShell>
