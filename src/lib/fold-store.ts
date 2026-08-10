@@ -44,7 +44,7 @@ const day = (offset: number) => {
 const initialState: FoldState = {
   onboarded: false,
   name: "Kanika",
-  partner: "Jignesh",
+  partner: "Albatross",
   soulCode: DEMO_CODE,
   prefs: { notifications: true, sound: true, haptics: true, animations: true },
   capsules: [
