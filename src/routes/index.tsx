@@ -242,8 +242,9 @@ function Home() {
 
       <section className="mt-8">
         <h1 className="font-display text-[38px] leading-[1.05] text-ink">Today, worth keeping.</h1>
-        <p className="mt-2 text-sm text-ink-soft">
-          Leave something for {state.partner}.
+        <p className="mt-2 text-sm text-ink-soft whitespace-pre-line">
+          Leave something for {state.partner}
+          {"\n"}.
         </p>
       </section>
 
