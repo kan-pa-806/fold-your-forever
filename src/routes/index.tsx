@@ -202,7 +202,7 @@ function Journey() {
             </div>
             <h2 className="font-display mt-8 text-4xl text-ink">Soul connection made.</h2>
             <p className="mt-3 text-sm text-ink-soft">
-              You and Jignesh now share one quiet little space.
+              You and Albatross now share one quiet little space.
             </p>
             <FoldButton className="mt-10" variant="ink" onClick={() => completeOnboarding(name)}>
               Enter Our Space →
@@ -242,8 +242,9 @@ function Home() {
 
       <section className="mt-8">
         <h1 className="font-display text-[38px] leading-[1.05] text-ink">Today, worth keeping.</h1>
-        <p className="mt-2 text-sm text-ink-soft">
-          Leave something for {state.partner}.
+        <p className="mt-2 text-sm text-ink-soft whitespace-pre-line">
+          Leave something for {state.partner}
+          {"\n"}.
         </p>
       </section>
 
