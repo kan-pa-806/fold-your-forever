@@ -15,7 +15,6 @@ export function WaxSeal({ onSealed }: { onSealed: () => void }) {
 
   const place = (glyph: string) => {
     if (done) return;
-    // seals always snap neatly onto the dotted target; extras fan out a touch
     const i = placed.length;
     const ring = i === 0 ? 0 : 22;
     const angle = (i - 1) * (Math.PI / 3);
@@ -60,35 +59,34 @@ export function WaxSeal({ onSealed }: { onSealed: () => void }) {
             clipPath: "polygon(0 0, 100% 0, 50% 100%)",
           }}
         />
+
+        {/* TARGET DOTTED BOX */}
         <div
           ref={targetRef}
-          className={`absolute left-1/2 top-[48%] grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-dashed transition-colors ${
+          className={`absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-dashed transition-colors ${
             dragging ? "border-coral" : "border-ink/20"
           }`}
         >
           {placed.length === 0 ? (
             <span className="text-[10px] tracking-widest text-ink-soft">HERE</span>
           ) : null}
-        </div>
 
-        {/* placed seals live above the target so they never unmount on re-drop */}
-        <AnimatePresence>
-          {placed.map((p) => (
-            <motion.div
-              key={p.id}
-              initial={{ scale: 1.7, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.6, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 220, damping: 14 }}
-              className="pointer-events-none absolute left-1/2 top-[48%]"
-              style={{
-                transform: `translate(-50%,-50%) translate(${p.x}px, ${p.y}px) rotate(${p.rotate}deg)`,
-              }}
-            >
-              <Stamp glyph={p.glyph} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+          {/* PLACED SEALS */}
+          <AnimatePresence>
+            {placed.map((p) => (
+              <motion.div
+                key={p.id}
+                initial={{ scale: 1.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1, x: p.x, y: p.y, rotate: p.rotate }}
+                exit={{ scale: 0.6, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 220, damping: 14 }}
+                className="pointer-events-none absolute"
+              >
+                <Stamp glyph={p.glyph} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </motion.div>
 
       {!done ? (
