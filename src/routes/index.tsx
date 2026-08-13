@@ -60,6 +60,62 @@ function Journey() {
   const [name, setName] = useState("Kanika");
   const [code, setCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [room, setRoom] = useState<Room | null>(null);
+  const [busy, setBusy] = useState<"none" | "generate" | "join">("none");
+  const [error, setError] = useState<string | null>(null);
+
+  // Realtime: the host waits here until a partner joins their room.
+  useEffect(() => {
+    if (!room || room.status !== "waiting") return;
+    let cancelled = false;
+    const unsubscribe = subscribeToRoom(room.id, (next) => {
+      if (cancelled) return;
+      setRoom(next);
+      if (next.status === "paired") setStep("paired");
+    });
+    // Safety net in case the realtime event is missed.
+    const poll = window.setInterval(async () => {
+      const fresh = await fetchRoom(room.id);
+      if (!cancelled && fresh?.status === "paired") {
+        setRoom(fresh);
+        setStep("paired");
+      }
+    }, 4000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(poll);
+      unsubscribe();
+    };
+  }, [room]);
+
+  const handleGenerate = async () => {
+    setError(null);
+    setBusy("generate");
+    try {
+      setRoom(await createRoom(name));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setBusy("none");
+    }
+  };
+
+  const handleJoin = async () => {
+    setError(null);
+    setBusy("join");
+    try {
+      const joined = await joinRoom(code, name);
+      setRoom(joined);
+      setStep("paired");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not join that room.");
+    } finally {
+      setBusy("none");
+    }
+  };
+
+  const partner = room ? partnerNameOf(room) : "Your person";
+
 
   return (
     <div className="flex min-h-full flex-col px-7 py-12">
