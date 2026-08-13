@@ -203,40 +203,71 @@ function Journey() {
 
             <div className="glass mt-7 rounded-3xl p-5 text-center">
               <p className="text-[11px] tracking-[0.2em] text-ink-soft">YOUR SOUL CODE</p>
-              <p className="font-display mt-2 text-3xl tracking-[0.24em] text-ink">{DEMO_CODE}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard?.writeText(DEMO_CODE);
-                  setCopied(true);
-                }}
-                className="press mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-2xl bg-white/70 px-4 text-xs text-ink"
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy code"}
-              </button>
+              {room ? (
+                <>
+                  <p className="font-display mt-2 text-3xl tracking-[0.24em] text-ink">
+                    {room.code}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(room.code);
+                      setCopied(true);
+                    }}
+                    className="press mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-2xl bg-white/70 px-4 text-xs text-ink"
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
+                    {copied ? "Copied" : "Copy code"}
+                  </button>
+                  <p className="mt-3 flex items-center justify-center gap-2 text-[11px] tracking-[0.16em] text-ink-soft">
+                    <Loader2 size={12} className="animate-spin" /> WAITING FOR YOUR PERSON…
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-2 text-sm text-ink-soft">
+                    Create a private room and share the code with your person.
+                  </p>
+                  <FoldButton
+                    className="mt-4"
+                    full
+                    disabled={busy !== "none"}
+                    onClick={handleGenerate}
+                  >
+                    {busy === "generate" ? "Generating…" : "Generate Code"}
+                  </FoldButton>
+                </>
+              )}
             </div>
 
-            <p className="mt-6 text-center text-[11px] tracking-[0.2em] text-ink-soft">
-              OR ENTER PARTNER&rsquo;S CODE
-            </p>
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="FOLD-••••"
-              aria-label="Partner Soul Code"
-              className="font-display mt-3 w-full rounded-2xl border border-white/60 bg-white/50 py-4 text-center text-2xl tracking-[0.24em] text-ink placeholder:text-ink-soft/50 focus:outline-none"
-            />
-            <FoldButton
-              className="mt-6"
-              full
-              disabled={code.replace(/\s/g, "") !== DEMO_CODE}
-              onClick={() => setStep("paired")}
-            >
-              Connect
-            </FoldButton>
-            <p className="mt-3 text-center text-[11px] text-ink-soft">
-              Demo code: {DEMO_CODE}
-            </p>
+            {!room ? (
+              <>
+                <p className="mt-6 text-center text-[11px] tracking-[0.2em] text-ink-soft">
+                  OR ENTER PARTNER&rsquo;S CODE
+                </p>
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="FOLD-••••"
+                  aria-label="Partner Soul Code"
+                  className="font-display mt-3 w-full rounded-2xl border border-white/60 bg-white/50 py-4 text-center text-2xl tracking-[0.24em] text-ink placeholder:text-ink-soft/50 focus:outline-none"
+                />
+                <FoldButton
+                  className="mt-6"
+                  full
+                  disabled={code.trim().length < 4 || busy !== "none"}
+                  onClick={handleJoin}
+                >
+                  {busy === "join" ? "Connecting…" : "Connect"}
+                </FoldButton>
+              </>
+            ) : null}
+
+            {error ? (
+              <p className="mt-4 text-center text-xs text-coral" role="alert">
+                {error}
+              </p>
+            ) : null}
           </motion.section>
         ) : null}
 
