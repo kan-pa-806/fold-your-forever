@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      rooms: {
+        Row: {
+          code: string
+          created_at: string
+          guest_device: string | null
+          guest_name: string | null
+          host_device: string
+          host_name: string | null
+          id: string
+          paired_at: string | null
+          status: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          guest_device?: string | null
+          guest_name?: string | null
+          host_device: string
+          host_name?: string | null
+          id?: string
+          paired_at?: string | null
+          status?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          guest_device?: string | null
+          guest_name?: string | null
+          host_device?: string
+          host_name?: string | null
+          id?: string
+          paired_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
