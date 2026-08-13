@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Check, Copy, Settings as SettingsIcon, Image as ImageIcon, Mic, PenLine } from "lucide-react";
