@@ -28,6 +28,7 @@ export type FoldState = {
   name: string;
   partner: string;
   soulCode: string;
+  roomId: string | null;
   capsules: Capsule[];
   prefs: Prefs;
 };
