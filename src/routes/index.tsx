@@ -304,9 +304,18 @@ function Journey() {
             </div>
             <h2 className="font-display mt-8 text-4xl text-ink">Soul connection made.</h2>
             <p className="mt-3 text-sm text-ink-soft">
-              You and Albatross now share one quiet little space.
+              You and {partner} now share one quiet little space.
             </p>
-            <FoldButton className="mt-10" variant="ink" onClick={() => completeOnboarding(name)}>
+            <FoldButton
+              className="mt-10"
+              variant="ink"
+              onClick={() =>
+                completeOnboarding(
+                  name,
+                  room ? { id: room.id, code: room.code, partner } : undefined,
+                )
+              }
+            >
               Enter Our Space →
             </FoldButton>
           </motion.section>
