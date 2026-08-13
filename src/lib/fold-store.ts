@@ -47,6 +47,7 @@ const initialState: FoldState = {
   name: "Kanika",
   partner: "Albatross",
   soulCode: DEMO_CODE,
+  roomId: null,
   prefs: { notifications: true, sound: true, haptics: true, animations: true },
   capsules: [
     {
