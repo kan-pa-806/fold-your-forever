@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { Check, Copy, Settings as SettingsIcon, Image as ImageIcon, Mic, PenLine } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Loader2,
+  Settings as SettingsIcon,
+  Image as ImageIcon,
+  Mic,
+  PenLine,
+} from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
 import { Logo } from "@/components/fold/Logo";
@@ -9,7 +17,14 @@ import { FoldButton } from "@/components/fold/FoldButton";
 import { ScratchCard } from "@/components/fold/ScratchCard";
 import { VoiceCassette } from "@/components/fold/VoiceCassette";
 import {
-  DEMO_CODE,
+  type Room,
+  createRoom,
+  fetchRoom,
+  joinRoom,
+  partnerNameOf,
+  subscribeToRoom,
+} from "@/lib/room";
+import {
   completeOnboarding,
   formatLongDay,
   markOpened,
@@ -60,6 +75,62 @@ function Journey() {
   const [name, setName] = useState("Kanika");
   const [code, setCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [room, setRoom] = useState<Room | null>(null);
+  const [busy, setBusy] = useState<"none" | "generate" | "join">("none");
+  const [error, setError] = useState<string | null>(null);
+
+  // Realtime: the host waits here until a partner joins their room.
+  useEffect(() => {
+    if (!room || room.status !== "waiting") return;
+    let cancelled = false;
+    const unsubscribe = subscribeToRoom(room.id, (next) => {
+      if (cancelled) return;
+      setRoom(next);
+      if (next.status === "paired") setStep("paired");
+    });
+    // Safety net in case the realtime event is missed.
+    const poll = window.setInterval(async () => {
+      const fresh = await fetchRoom(room.id);
+      if (!cancelled && fresh?.status === "paired") {
+        setRoom(fresh);
+        setStep("paired");
+      }
+    }, 4000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(poll);
+      unsubscribe();
+    };
+  }, [room]);
+
+  const handleGenerate = async () => {
+    setError(null);
+    setBusy("generate");
+    try {
+      setRoom(await createRoom(name));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setBusy("none");
+    }
+  };
+
+  const handleJoin = async () => {
+    setError(null);
+    setBusy("join");
+    try {
+      const joined = await joinRoom(code, name);
+      setRoom(joined);
+      setStep("paired");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not join that room.");
+    } finally {
+      setBusy("none");
+    }
+  };
+
+  const partner = room ? partnerNameOf(room) : "Your person";
+
 
   return (
     <div className="flex min-h-full flex-col px-7 py-12">
@@ -140,40 +211,71 @@ function Journey() {
 
             <div className="glass mt-7 rounded-3xl p-5 text-center">
               <p className="text-[11px] tracking-[0.2em] text-ink-soft">YOUR SOUL CODE</p>
-              <p className="font-display mt-2 text-3xl tracking-[0.24em] text-ink">{DEMO_CODE}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard?.writeText(DEMO_CODE);
-                  setCopied(true);
-                }}
-                className="press mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-2xl bg-white/70 px-4 text-xs text-ink"
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy code"}
-              </button>
+              {room ? (
+                <>
+                  <p className="font-display mt-2 text-3xl tracking-[0.24em] text-ink">
+                    {room.code}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(room.code);
+                      setCopied(true);
+                    }}
+                    className="press mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-2xl bg-white/70 px-4 text-xs text-ink"
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
+                    {copied ? "Copied" : "Copy code"}
+                  </button>
+                  <p className="mt-3 flex items-center justify-center gap-2 text-[11px] tracking-[0.16em] text-ink-soft">
+                    <Loader2 size={12} className="animate-spin" /> WAITING FOR YOUR PERSON…
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-2 text-sm text-ink-soft">
+                    Create a private room and share the code with your person.
+                  </p>
+                  <FoldButton
+                    className="mt-4"
+                    full
+                    disabled={busy !== "none"}
+                    onClick={handleGenerate}
+                  >
+                    {busy === "generate" ? "Generating…" : "Generate Code"}
+                  </FoldButton>
+                </>
+              )}
             </div>
 
-            <p className="mt-6 text-center text-[11px] tracking-[0.2em] text-ink-soft">
-              OR ENTER PARTNER&rsquo;S CODE
-            </p>
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="FOLD-••••"
-              aria-label="Partner Soul Code"
-              className="font-display mt-3 w-full rounded-2xl border border-white/60 bg-white/50 py-4 text-center text-2xl tracking-[0.24em] text-ink placeholder:text-ink-soft/50 focus:outline-none"
-            />
-            <FoldButton
-              className="mt-6"
-              full
-              disabled={code.replace(/\s/g, "") !== DEMO_CODE}
-              onClick={() => setStep("paired")}
-            >
-              Connect
-            </FoldButton>
-            <p className="mt-3 text-center text-[11px] text-ink-soft">
-              Demo code: {DEMO_CODE}
-            </p>
+            {!room ? (
+              <>
+                <p className="mt-6 text-center text-[11px] tracking-[0.2em] text-ink-soft">
+                  OR ENTER PARTNER&rsquo;S CODE
+                </p>
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="FOLD-••••"
+                  aria-label="Partner Soul Code"
+                  className="font-display mt-3 w-full rounded-2xl border border-white/60 bg-white/50 py-4 text-center text-2xl tracking-[0.24em] text-ink placeholder:text-ink-soft/50 focus:outline-none"
+                />
+                <FoldButton
+                  className="mt-6"
+                  full
+                  disabled={code.trim().length < 4 || busy !== "none"}
+                  onClick={handleJoin}
+                >
+                  {busy === "join" ? "Connecting…" : "Connect"}
+                </FoldButton>
+              </>
+            ) : null}
+
+            {error ? (
+              <p className="mt-4 text-center text-xs text-coral" role="alert">
+                {error}
+              </p>
+            ) : null}
           </motion.section>
         ) : null}
 
@@ -202,9 +304,18 @@ function Journey() {
             </div>
             <h2 className="font-display mt-8 text-4xl text-ink">Soul connection made.</h2>
             <p className="mt-3 text-sm text-ink-soft">
-              You and Albatross now share one quiet little space.
+              You and {partner} now share one quiet little space.
             </p>
-            <FoldButton className="mt-10" variant="ink" onClick={() => completeOnboarding(name)}>
+            <FoldButton
+              className="mt-10"
+              variant="ink"
+              onClick={() =>
+                completeOnboarding(
+                  name,
+                  room ? { id: room.id, code: room.code, partner } : undefined,
+                )
+              }
+            >
               Enter Our Space →
             </FoldButton>
           </motion.section>

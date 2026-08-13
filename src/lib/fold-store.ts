@@ -28,6 +28,7 @@ export type FoldState = {
   name: string;
   partner: string;
   soulCode: string;
+  roomId: string | null;
   capsules: Capsule[];
   prefs: Prefs;
 };
@@ -46,6 +47,7 @@ const initialState: FoldState = {
   name: "Kanika",
   partner: "Albatross",
   soulCode: DEMO_CODE,
+  roomId: null,
   prefs: { notifications: true, sound: true, haptics: true, animations: true },
   capsules: [
     {
@@ -161,8 +163,15 @@ export function useFold() {
 
 /* ---------- actions ---------- */
 
-export function completeOnboarding(name: string) {
-  setState({ onboarded: true, name: name.trim() || "You" });
+export function completeOnboarding(
+  name: string,
+  room?: { id: string; code: string; partner: string },
+) {
+  setState({
+    onboarded: true,
+    name: name.trim() || "You",
+    ...(room ? { roomId: room.id, soulCode: room.code, partner: room.partner } : {}),
+  });
 }
 
 export function addCapsule(capsule: Omit<Capsule, "id" | "date" | "author" | "status">) {
