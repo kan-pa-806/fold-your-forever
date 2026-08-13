@@ -9,7 +9,14 @@ import { FoldButton } from "@/components/fold/FoldButton";
 import { ScratchCard } from "@/components/fold/ScratchCard";
 import { VoiceCassette } from "@/components/fold/VoiceCassette";
 import {
-  DEMO_CODE,
+  type Room,
+  createRoom,
+  fetchRoom,
+  joinRoom,
+  partnerNameOf,
+  subscribeToRoom,
+} from "@/lib/room";
+import {
   completeOnboarding,
   formatLongDay,
   markOpened,
