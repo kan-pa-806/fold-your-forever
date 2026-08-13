@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { Check, Copy, Settings as SettingsIcon, Image as ImageIcon, Mic, PenLine } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Loader2,
+  Settings as SettingsIcon,
+  Image as ImageIcon,
+  Mic,
+  PenLine,
+} from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
 import { Logo } from "@/components/fold/Logo";
