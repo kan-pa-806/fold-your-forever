@@ -163,8 +163,15 @@ export function useFold() {
 
 /* ---------- actions ---------- */
 
-export function completeOnboarding(name: string) {
-  setState({ onboarded: true, name: name.trim() || "You" });
+export function completeOnboarding(
+  name: string,
+  room?: { id: string; code: string; partner: string },
+) {
+  setState({
+    onboarded: true,
+    name: name.trim() || "You",
+    ...(room ? { roomId: room.id, soulCode: room.code, partner: room.partner } : {}),
+  });
 }
 
 export function addCapsule(capsule: Omit<Capsule, "id" | "date" | "author" | "status">) {
