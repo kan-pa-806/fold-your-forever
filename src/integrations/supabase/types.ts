@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      capsule_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          room_id: string
+          sender_device: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          room_id: string
+          sender_device: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          room_id?: string
+          sender_device?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capsule_events_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      capsules: {
+        Row: {
+          caption: string
+          created_at: string
+          id: string
+          note: string
+          opened_at: string | null
+          photo_url: string | null
+          room_id: string
+          sender_device: string
+          sender_name: string | null
+          updated_at: string
+          voice_seconds: number | null
+          voice_url: string | null
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          id?: string
+          note?: string
+          opened_at?: string | null
+          photo_url?: string | null
+          room_id: string
+          sender_device: string
+          sender_name?: string | null
+          updated_at?: string
+          voice_seconds?: number | null
+          voice_url?: string | null
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          id?: string
+          note?: string
+          opened_at?: string | null
+          photo_url?: string | null
+          room_id?: string
+          sender_device?: string
+          sender_name?: string | null
+          updated_at?: string
+          voice_seconds?: number | null
+          voice_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capsules_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          device_id: string
+          endpoint: string
+          id: string
+          p256dh: string
+          room_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          device_id: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          room_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          device_id?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rooms: {
         Row: {
           code: string
@@ -55,7 +178,158 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fold_create_room: {
+        Args: { p_device: string; p_name: string }
+        Returns: {
+          code: string
+          created_at: string
+          guest_device: string | null
+          guest_name: string | null
+          host_device: string
+          host_name: string | null
+          id: string
+          paired_at: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rooms"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fold_get_room: {
+        Args: { p_device: string; p_id: string }
+        Returns: {
+          code: string
+          created_at: string
+          guest_device: string | null
+          guest_name: string | null
+          host_device: string
+          host_name: string | null
+          id: string
+          paired_at: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rooms"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fold_is_member: {
+        Args: { p_device: string; p_room: string }
+        Returns: boolean
+      }
+      fold_join_room: {
+        Args: { p_code: string; p_device: string; p_name: string }
+        Returns: {
+          code: string
+          created_at: string
+          guest_device: string | null
+          guest_name: string | null
+          host_device: string
+          host_name: string | null
+          id: string
+          paired_at: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rooms"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fold_list_capsules: {
+        Args: { p_device: string; p_room: string }
+        Returns: {
+          caption: string
+          created_at: string
+          id: string
+          note: string
+          opened_at: string | null
+          photo_url: string | null
+          room_id: string
+          sender_device: string
+          sender_name: string | null
+          updated_at: string
+          voice_seconds: number | null
+          voice_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "capsules"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      fold_mark_opened: {
+        Args: { p_device: string; p_id: string }
+        Returns: {
+          caption: string
+          created_at: string
+          id: string
+          note: string
+          opened_at: string | null
+          photo_url: string | null
+          room_id: string
+          sender_device: string
+          sender_name: string | null
+          updated_at: string
+          voice_seconds: number | null
+          voice_url: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "capsules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fold_save_push_subscription: {
+        Args: {
+          p_auth: string
+          p_device: string
+          p_endpoint: string
+          p_p256dh: string
+          p_room: string
+        }
+        Returns: undefined
+      }
+      fold_send_capsule: {
+        Args: {
+          p_caption: string
+          p_device: string
+          p_name: string
+          p_note: string
+          p_photo: string
+          p_room: string
+          p_voice: string
+          p_voice_seconds: number
+        }
+        Returns: {
+          caption: string
+          created_at: string
+          id: string
+          note: string
+          opened_at: string | null
+          photo_url: string | null
+          room_id: string
+          sender_device: string
+          sender_name: string | null
+          updated_at: string
+          voice_seconds: number | null
+          voice_url: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "capsules"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
