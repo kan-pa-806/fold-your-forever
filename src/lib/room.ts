@@ -25,87 +25,47 @@ export function deviceId() {
   }
 }
 
-const ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+/** FOLD-XXXX where XXXX is 4 alphanumerics. */
+export const CODE_PATTERN = /^FOLD-[A-Z0-9]{4}$/;
 
-function randomCode() {
-  let out = "";
-  for (let i = 0; i < 4; i += 1) {
-    out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
-  }
-  return `FOLD-${out}`;
+export function normalizeCode(raw: string) {
+  const cleaned = raw.trim().toUpperCase().replace(/\s+/g, "");
+  const body = cleaned.replace(/^FOLD-?/, "").replace(/[^A-Z0-9]/g, "");
+  return body ? `FOLD-${body.slice(0, 4)}` : "";
 }
 
-/** Creates a new room with a unique code and 'waiting' status. */
-export async function createRoom(hostName: string): Promise<Room> {
-  for (let attempt = 0; attempt < 6; attempt += 1) {
-    const { data, error } = await supabase
-      .from("rooms")
-      .insert({
-        code: randomCode(),
-        status: "waiting",
-        host_device: deviceId(),
-        host_name: hostName || null,
-      })
-      .select()
-      .single();
+export function isValidCode(raw: string) {
+  return CODE_PATTERN.test(normalizeCode(raw));
+}
 
-    if (!error && data) return data as Room;
-    if (error && error.code !== "23505") throw new Error(error.message);
-  }
-  throw new Error("Could not generate a free Soul Code. Please try again.");
+/** Creates a new room with a unique FOLD-XXXX code and 'waiting' status. */
+export async function createRoom(hostName: string): Promise<Room> {
+  const { data, error } = await supabase.rpc("fold_create_room", {
+    p_device: deviceId(),
+    p_name: hostName,
+  });
+  if (error || !data) throw new Error(error?.message ?? "Could not create a room.");
+  return data as unknown as Room;
 }
 
 /** Matches an existing waiting room by code and pairs both partners. */
 export async function joinRoom(code: string, guestName: string): Promise<Room> {
-  const normalized = code.trim().toUpperCase();
-
-  const { data: found, error: findError } = await supabase
-    .from("rooms")
-    .select("*")
-    .eq("code", normalized)
-    .maybeSingle();
-
-  if (findError) throw new Error(findError.message);
-  if (!found) throw new Error("No room found with that Soul Code.");
-  if (found.status !== "waiting") throw new Error("That room is already paired.");
-  if (found.host_device === deviceId()) throw new Error("That's your own code — share it instead.");
-
-  const { data, error } = await supabase
-    .from("rooms")
-    .update({
-      status: "paired",
-      guest_device: deviceId(),
-      guest_name: guestName || null,
-      paired_at: new Date().toISOString(),
-    })
-    .eq("id", found.id)
-    .eq("status", "waiting")
-    .select()
-    .single();
-
-  if (error || !data) throw new Error(error?.message ?? "Someone just took that room.");
-  return data as Room;
+  const normalized = normalizeCode(code);
+  if (!CODE_PATTERN.test(normalized)) {
+    throw new Error("Soul Codes look like FOLD-1608.");
+  }
+  const { data, error } = await supabase.rpc("fold_join_room", {
+    p_code: normalized,
+    p_device: deviceId(),
+    p_name: guestName,
+  });
+  if (error || !data) throw new Error(error?.message ?? "Could not join that room.");
+  return data as unknown as Room;
 }
 
 export async function fetchRoom(id: string): Promise<Room | null> {
-  const { data } = await supabase.from("rooms").select("*").eq("id", id).maybeSingle();
-  return (data as Room | null) ?? null;
-}
-
-/** Realtime subscription for a single room row. Returns an unsubscribe fn. */
-export function subscribeToRoom(id: string, onChange: (room: Room) => void) {
-  const channel = supabase
-    .channel(`room-${id}`)
-    .on(
-      "postgres_changes",
-      { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${id}` },
-      (payload) => onChange(payload.new as Room),
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-  };
+  const { data } = await supabase.rpc("fold_get_room", { p_id: id, p_device: deviceId() });
+  return (data as unknown as Room | null) ?? null;
 }
 
 /** Name of the other person in the room, from this device's perspective. */
