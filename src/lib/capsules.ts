@@ -40,7 +40,7 @@ async function signAll(paths: string[]) {
 export async function uploadMedia(roomId: string, file: Blob, extension: string) {
   const path = `${roomId}/${crypto.randomUUID()}.${extension}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-    contentType: file.type || undefined,
+    contentType: file.type || "application/octet-stream",
     upsert: false,
   });
   if (error) throw new Error(error.message);
@@ -77,11 +77,11 @@ export async function sendCapsule(input: {
     p_room: input.roomId,
     p_device: deviceId(),
     p_name: input.senderName,
-    p_photo: input.photoPath,
+    p_photo: input.photoPath ?? "",
     p_caption: input.caption,
     p_note: input.note,
-    p_voice: input.voicePath,
-    p_voice_seconds: input.voiceSeconds,
+    p_voice: input.voicePath ?? "",
+    p_voice_seconds: input.voiceSeconds ?? 0,
   });
   if (error) throw new Error(error.message);
   return data as unknown as Capsule;

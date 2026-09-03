@@ -14,6 +14,7 @@ import { Route as CreateRouteImport } from './routes/create'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as HistoryBoxRouteImport } from './routes/history.$box'
+import { Route as ApiPublicPushRouteImport } from './routes/api/public/push'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const HistoryBoxRoute = HistoryBoxRouteImport.update({
   path: '/history/$box',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPushRoute = ApiPublicPushRouteImport.update({
+  id: '/api/public/push',
+  path: '/api/public/push',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/vault': typeof VaultRoute
   '/history/$box': typeof HistoryBoxRoute
+  '/api/public/push': typeof ApiPublicPushRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/vault': typeof VaultRoute
   '/history/$box': typeof HistoryBoxRoute
+  '/api/public/push': typeof ApiPublicPushRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/vault': typeof VaultRoute
   '/history/$box': typeof HistoryBoxRoute
+  '/api/public/push': typeof ApiPublicPushRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/create' | '/settings' | '/vault' | '/history/$box'
+  fullPaths:
+    | '/'
+    | '/create'
+    | '/settings'
+    | '/vault'
+    | '/history/$box'
+    | '/api/public/push'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/create' | '/settings' | '/vault' | '/history/$box'
-  id: '__root__' | '/' | '/create' | '/settings' | '/vault' | '/history/$box'
+  to:
+    | '/'
+    | '/create'
+    | '/settings'
+    | '/vault'
+    | '/history/$box'
+    | '/api/public/push'
+  id:
+    | '__root__'
+    | '/'
+    | '/create'
+    | '/settings'
+    | '/vault'
+    | '/history/$box'
+    | '/api/public/push'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +105,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   VaultRoute: typeof VaultRoute
   HistoryBoxRoute: typeof HistoryBoxRoute
+  ApiPublicPushRoute: typeof ApiPublicPushRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryBoxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/push': {
+      id: '/api/public/push'
+      path: '/api/public/push'
+      fullPath: '/api/public/push'
+      preLoaderRoute: typeof ApiPublicPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   VaultRoute: VaultRoute,
   HistoryBoxRoute: HistoryBoxRoute,
+  ApiPublicPushRoute: ApiPublicPushRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
