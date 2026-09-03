@@ -68,6 +68,22 @@ export async function fetchRoom(id: string): Promise<Room | null> {
   return (data as unknown as Room | null) ?? null;
 }
 
+/** Watches a room row so the host sees the guest arrive immediately. */
+export function subscribeToRoom(id: string, onChange: (room: Room) => void) {
+  const channel = supabase
+    .channel(`room-${id}`)
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${id}` },
+      (payload) => onChange(payload.new as Room),
+    )
+    .subscribe();
+
+  return () => {
+    void supabase.removeChannel(channel);
+  };
+}
+
 /** Name of the other person in the room, from this device's perspective. */
 export function partnerNameOf(room: Room) {
   const me = deviceId();
