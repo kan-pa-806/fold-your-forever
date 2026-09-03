@@ -53,7 +53,15 @@ export const Route = createFileRoute("/api/public/push")({
           const payload = await buildPushPayload(message, subscription, vapid);
           const body = new ArrayBuffer(payload.body.byteLength);
           new Uint8Array(body).set(payload.body);
-          const response = await fetch(subscription.endpoint, { ...payload, body });
+          const headers = new Headers();
+          Object.entries(payload.headers).forEach(([key, value]) => {
+            if (value !== undefined) headers.set(key, value);
+          });
+          const response = await fetch(subscription.endpoint, {
+            method: payload.method,
+            headers,
+            body,
+          });
           if (!response.ok && (response.status === 404 || response.status === 410)) {
             await supabaseAdmin.from("push_subscriptions").delete().eq("endpoint", row.endpoint);
           }
