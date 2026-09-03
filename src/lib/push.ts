@@ -13,7 +13,7 @@ export async function enablePush(roomId: string) {
   if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) {
     return false;
   }
-  const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+  const publicKey = import.meta.env["VITE_VAPID_PUBLIC_KEY"];
   if (!publicKey) return false;
 
   const permission = Notification.permission === "default"
@@ -28,14 +28,16 @@ export async function enablePush(roomId: string) {
     applicationServerKey: base64ToBytes(publicKey),
   });
   const json = subscription.toJSON();
-  if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) return false;
+  const p256dh = json.keys?.["p256dh"];
+  const auth = json.keys?.["auth"];
+  if (!json.endpoint || !p256dh || !auth) return false;
 
   const { error } = await supabase.rpc("fold_save_push_subscription", {
     p_room: roomId,
     p_device: deviceId(),
     p_endpoint: json.endpoint,
-    p_p256dh: json.keys.p256dh,
-    p_auth: json.keys.auth,
+    p_p256dh: p256dh,
+    p_auth: auth,
   });
   if (error) throw new Error(error.message);
   return true;
