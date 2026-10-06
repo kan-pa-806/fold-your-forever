@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MessageSquareQuote, Sparkles } from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
 import { FoldButton } from "@/components/fold/FoldButton";
@@ -10,7 +10,7 @@ import { VoiceCassette } from "@/components/fold/VoiceCassette";
 import { HandwrittenNote } from "@/components/fold/HandwrittenNote";
 import { LetterFold } from "@/components/fold/LetterFold";
 import { WaxSeal } from "@/components/fold/WaxSeal";
-import { addCapsule, useFold } from "@/lib/fold-store";
+import { addCapsule, useFold, MOODS, type MoodType } from "@/lib/fold-store";
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -36,16 +36,46 @@ type Stage = "canvas" | "preview" | "folding" | "seal" | "sent";
 function CreatePage() {
   const state = useFold();
   const navigate = useNavigate();
+  const draftChat = state.draftFoldFromChat;
+
   const [stage, setStage] = useState<Stage>("canvas");
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [caption, setCaption] = useState("");
-  const [note, setNote] = useState("");
-  const [voice, setVoice] = useState<number | null>(null);
+  const [photo, setPhoto] = useState<string | null>(draftChat?.photo ?? null);
+  const [caption, setCaption] = useState(draftChat?.caption ?? "");
+  const [note, setNote] = useState(
+    draftChat
+      ? draftChat.type === "text"
+        ? `"${draftChat.text}"\n\n— Folded from our conversation`
+        : draftChat.caption
+          ? `"${draftChat.caption}"\n\n— Folded from our conversation`
+          : "Folded from our quiet conversation"
+      : "",
+  );
+  const [voice, setVoice] = useState<number | null>(draftChat?.voiceSeconds ?? null);
+  const [mood, setMood] = useState<MoodType>(state.myMood.type);
+
+  // If draftChat changed
+  useEffect(() => {
+    if (draftChat) {
+      if (draftChat.photo) setPhoto(draftChat.photo);
+      if (draftChat.caption) setCaption(draftChat.caption);
+      if (draftChat.voiceSeconds) setVoice(draftChat.voiceSeconds);
+      if (draftChat.text) {
+        setNote(`"${draftChat.text}"\n\n— Folded from our conversation`);
+      }
+    }
+  }, [draftChat]);
 
   const ready = Boolean(note.trim() || photo || voice);
 
   const send = () => {
-    addCapsule({ photo, caption, note, voice });
+    addCapsule({
+      photo,
+      caption,
+      note,
+      voice,
+      mood,
+      foldedFromChatId: draftChat?.id,
+    });
     setStage("sent");
   };
 
@@ -69,6 +99,59 @@ function CreatePage() {
               <p className="mt-2 text-sm text-ink-soft">
                 Three small things. Take your time with them.
               </p>
+
+              {draftChat ? (
+                <div className="mt-4 flex items-center justify-between rounded-2xl bg-coral/15 px-4 py-2.5 text-xs border border-coral/30">
+                  <div className="flex items-center gap-2 text-ink">
+                    <MessageSquareQuote size={15} className="text-coral" />
+                    <span>
+                      Folding a moment from <strong>{draftChat.senderName}</strong>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPhoto(null);
+                      setCaption("");
+                      setNote("");
+                      setVoice(null);
+                    }}
+                    className="text-[11px] text-coral hover:underline"
+                  >
+                    Clear prefill
+                  </button>
+                </div>
+              ) : null}
+
+              {/* Mood at time of creation */}
+              <div className="mt-6 rounded-2xl bg-white/40 p-3.5 border border-white/60">
+                <div className="flex items-center justify-between text-xs text-ink-soft">
+                  <span className="flex items-center gap-1.5 font-medium text-ink">
+                    <Sparkles size={13} className="text-coral" />
+                    Mood of this memory:
+                  </span>
+                  <span>{MOODS[mood]?.label} {MOODS[mood]?.emoji}</span>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between gap-1">
+                  {(Object.entries(MOODS) as [MoodType, (typeof MOODS)[MoodType]][]).map(
+                    ([k, v]) => (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setMood(k)}
+                        className={`press flex flex-1 flex-col items-center rounded-xl py-1.5 text-center transition-all ${
+                          mood === k
+                            ? "bg-white shadow-soft ring-1 ring-coral"
+                            : "bg-white/30 hover:bg-white/60"
+                        }`}
+                      >
+                        <span className="text-lg">{v.emoji}</span>
+                        <span className="mt-0.5 text-[9px] text-ink">{v.label}</span>
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
 
               <div className="mt-8 space-y-8">
                 <PhotoPolaroid

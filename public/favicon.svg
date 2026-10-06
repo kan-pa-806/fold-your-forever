@@ -1,0 +1,9 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="32" cy="32" r="30" fill="#F8F6F0" stroke="#45423E" stroke-width="2"/>
+  <circle cx="32" cy="32" r="26" fill="#FDFCF7" stroke="#E68A6E" stroke-dasharray="3 3" stroke-width="1.2"/>
+  <!-- Stylized Folded F -->
+  <path d="M20 16 H40 C41.5 16 42.2 17.5 41.3 18.6 L34.5 27.5 H27 V46 C27 47.1 26.1 48 25 48 C23.9 48 23 47.1 23 46 V19 C23 17.3 24.3 16 26 16 Z" fill="#45423E"/>
+  <path d="M24 17 L39.5 17 L31.5 27 Z" fill="#E68A6E" stroke="#FFFFFF" stroke-width="0.8"/>
+  <path d="M26.5 29.5 H37.5 C38.6 29.5 39.3 30.6 38.6 31.6 L35.5 35.5 H26.5 V29.5 Z" fill="#E68A6E" opacity="0.95"/>
+  <circle cx="30" cy="32.5" r="2.5" fill="#8B3D30"/>
+</svg>

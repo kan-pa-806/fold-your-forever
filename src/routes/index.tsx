@@ -9,6 +9,9 @@ import {
   Image as ImageIcon,
   Mic,
   PenLine,
+  MessageCircleHeart,
+  FolderHeart,
+  Sparkles,
 } from "lucide-react";
 
 import { AppShell } from "@/components/fold/AppShell";
@@ -16,6 +19,8 @@ import { Logo } from "@/components/fold/Logo";
 import { FoldButton } from "@/components/fold/FoldButton";
 import { ScratchCard } from "@/components/fold/ScratchCard";
 import { VoiceCassette } from "@/components/fold/VoiceCassette";
+import { MoodSelector } from "@/components/fold/MoodSelector";
+import { cn } from "@/lib/utils";
 import {
   type Room,
   createRoom,
@@ -327,40 +332,172 @@ function Journey() {
 
 /* --------------------------------- home --------------------------------- */
 
+function getTimeGreeting() {
+  const hr = new Date().getHours();
+  if (hr < 12) return "Good morning";
+  if (hr < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 function Home() {
   const state = useFold();
   const navigate = useNavigate();
   const today = todaysCapsule(state);
   const whisper = partnerWhisper(state);
+  const lastMessage = state.messages[state.messages.length - 1];
+  const totalFolds = state.capsules.length;
 
   return (
-    <div className="px-5 pt-7">
+    <div className="px-5 pt-6 pb-4">
+      {/* Intimate Relationship Header */}
       <header className="flex items-center justify-between">
         <div>
           <Logo size="sm" />
-          <p className="mt-1 text-[11px] tracking-[0.18em] text-ink-soft">
-            {formatLongDay(new Date()).toUpperCase()}
+          <p className="mt-1 text-[10px] tracking-[0.2em] text-ink-soft">
+            {formatLongDay(new Date()).toUpperCase()} · OUR PRIVATE WORLD
           </p>
         </div>
-        <Link
-          to="/settings"
-          aria-label="Settings"
-          className="press glass grid h-11 w-11 place-items-center rounded-full text-ink"
-        >
-          <SettingsIcon size={17} strokeWidth={1.6} />
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Pair connection status badge */}
+          <div className="glass flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] text-ink">
+            <span
+              className={cn(
+                "h-2 w-2 rounded-full",
+                state.isPartnerOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" : "bg-ink/30",
+              )}
+            />
+            <span className="text-[11px]">
+              {state.isPartnerOnline ? "Connected" : "Offline"}
+            </span>
+          </div>
+
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            className="press glass grid h-10 w-10 place-items-center rounded-full text-ink"
+          >
+            <SettingsIcon size={16} strokeWidth={1.6} />
+          </Link>
+        </div>
       </header>
 
-      <section className="mt-8">
-        <h1 className="font-display text-[38px] leading-[1.05] text-ink">Today, worth keeping.</h1>
-        <p className="mt-2 text-sm text-ink-soft whitespace-pre-line">
-          Leave something for {state.partner}
-          {"\n"}.
+      {/* Intimate Greeting Section */}
+      <section className="mt-7">
+        <span className="text-[11px] tracking-[0.22em] text-coral font-medium">
+          A PRIVATE SPACE FOR TWO
+        </span>
+        <h1 className="font-display text-[36px] leading-[1.08] text-ink">
+          {getTimeGreeting()}, {state.name} 🤍
+        </h1>
+        <p className="mt-1 text-sm text-ink-soft">
+          You and <strong className="text-ink font-medium">{state.partner}</strong> share this quiet corner of the world.
         </p>
       </section>
 
+      {/* MOOD SYSTEM INTEGRATION */}
+      <section className="mt-6">
+        <MoodSelector />
+      </section>
+
+      {/* QUICK ACTIONS BAR */}
+      <section className="mt-6">
+        <div className="grid grid-cols-4 gap-2">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/chat" })}
+            className="press paper grain flex flex-col items-center justify-center rounded-2xl py-3 px-1 text-center"
+          >
+            <MessageCircleHeart size={18} className="text-coral" />
+            <span className="mt-1.5 text-[11px] font-medium text-ink">Chat</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/create" })}
+            className="press paper grain flex flex-col items-center justify-center rounded-2xl py-3 px-1 text-center"
+          >
+            <PenLine size={18} className="text-teal" />
+            <span className="mt-1.5 text-[11px] font-medium text-ink">Fold Now</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/vault" })}
+            className="press paper grain flex flex-col items-center justify-center rounded-2xl py-3 px-1 text-center"
+          >
+            <FolderHeart size={18} className="text-wax" />
+            <span className="mt-1.5 text-[11px] font-medium text-ink">
+              Vault ({totalFolds})
+            </span>
+          </button>
+
+          <Link
+            to="/settings"
+            className="press paper grain flex flex-col items-center justify-center rounded-2xl py-3 px-1 text-center"
+          >
+            <Sparkles size={18} className="text-coral" />
+            <span className="mt-1.5 text-[11px] font-medium text-ink">Our Space</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* CONTINUE YOUR CONVERSATION / RECENT CHAT MOMENT */}
+      {lastMessage ? (
+        <section className="glass-strong mt-6 rounded-[28px] p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <MessageCircleHeart size={13} className="text-coral" />
+              <p className="text-[11px] font-medium tracking-[0.2em] text-ink-soft">
+                CONTINUE YOUR CONVERSATION
+              </p>
+            </div>
+            <Link
+              to="/chat"
+              className="text-[11px] font-medium text-coral hover:underline"
+            >
+              Open chat →
+            </Link>
+          </div>
+
+          <div
+            onClick={() => navigate({ to: "/chat" })}
+            className="press paper grain mt-3.5 cursor-pointer rounded-2xl p-4 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium text-ink">
+                {lastMessage.author === "me" ? "You whispered" : `${state.partner} whispered`}
+              </span>
+              <span className="text-[10px] text-ink-soft">
+                {new Date(lastMessage.timestamp).toLocaleTimeString([], {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+
+            <p className="mt-1.5 text-sm text-ink-soft line-clamp-2">
+              {lastMessage.type === "photo"
+                ? `📷 [Photograph] ${lastMessage.caption || "Shared a view"}`
+                : lastMessage.type === "voice"
+                  ? `🎙️ [Voice memo] Whisper (${lastMessage.voiceSeconds}s)`
+                  : lastMessage.text}
+            </p>
+
+            <div className="mt-3 flex items-center justify-between border-t border-ink/5 pt-2.5">
+              <span className="text-[10px] tracking-wide text-ink-soft">
+                Tap to reply to {state.partner}
+              </span>
+              <span className="text-[10px] text-coral font-medium">Whisper back →</span>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* DAILY CAPSULE */}
       <section className="glass-strong mt-6 rounded-[28px] p-5">
-        <p className="text-[11px] tracking-[0.2em] text-ink-soft">DAILY CAPSULE</p>
+        <p className="text-[11px] font-medium tracking-[0.2em] text-ink-soft">
+          DAILY CAPSULE · FOLD INTO FOREVER
+        </p>
 
         {today ? (
           <>
@@ -374,27 +511,29 @@ function Home() {
               variant="ghost"
               onClick={() => navigate({ to: "/vault" })}
             >
-              View in the vault
+              View in our vault ({totalFolds} memories)
             </FoldButton>
           </>
         ) : (
           <>
             <div className="mt-4 flex items-end gap-3">
-              <div className="paper flex h-24 w-20 -rotate-3 flex-col items-center justify-center rounded-[6px] text-ink-soft">
+              <div className="paper flex h-24 w-20 -rotate-3 flex-col items-center justify-center rounded-[8px] text-ink-soft shadow-soft">
                 <ImageIcon size={18} strokeWidth={1.4} />
                 <span className="mt-1 text-[9px] tracking-widest">PHOTO</span>
               </div>
-              <div className="paper flex h-20 w-20 rotate-2 flex-col items-center justify-center rounded-[6px] text-ink-soft">
+              <div className="paper flex h-20 w-20 rotate-2 flex-col items-center justify-center rounded-[8px] text-ink-soft shadow-soft">
                 <Mic size={18} strokeWidth={1.4} />
                 <span className="mt-1 text-[9px] tracking-widest">VOICE</span>
               </div>
-              <div className="paper flex h-24 w-20 -rotate-1 flex-col items-center justify-center rounded-[6px] text-ink-soft">
+              <div className="paper flex h-24 w-20 -rotate-1 flex-col items-center justify-center rounded-[8px] text-ink-soft shadow-soft">
                 <PenLine size={18} strokeWidth={1.4} />
                 <span className="mt-1 text-[9px] tracking-widest">NOTE</span>
               </div>
             </div>
             <p className="font-display mt-5 text-2xl text-ink">Today is still unwritten.</p>
-            <p className="text-sm text-ink-soft">Leave a little piece of it here.</p>
+            <p className="text-sm text-ink-soft">
+              Capture a photograph, a whisper or a handwritten note for {state.partner}.
+            </p>
             <FoldButton className="mt-4" full onClick={() => navigate({ to: "/create" })}>
               Create Today&rsquo;s Capsule
             </FoldButton>
@@ -402,12 +541,20 @@ function Home() {
         )}
       </section>
 
+      {/* FROM PARTNER / LATEST FOLD MEMORY */}
       <section className="mt-7">
-        <p className="text-[11px] tracking-[0.2em] text-ink-soft">FROM {state.partner.toUpperCase()}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-medium tracking-[0.2em] text-ink-soft">
+            FROM {state.partner.toUpperCase()}
+          </p>
+          <span className="text-[10px] tracking-wider text-coral">
+            PRIVATE TO YOU
+          </span>
+        </div>
         <div className="mt-3">
           {whisper ? (
             <ScratchCard onRevealed={() => markOpened(whisper.id)}>
-              <div className="paper grain rounded-[26px] p-5">
+              <div className="paper grain rounded-[26px] p-5 shadow-lift">
                 {whisper.photo ? (
                   <div className="paper mb-4 rotate-[-1.5deg] rounded-[6px] p-2">
                     <img
@@ -431,7 +578,7 @@ function Home() {
             <div className="glass rounded-[26px] p-6 text-center">
               <p className="font-display text-2xl text-ink">Nothing from your person yet.</p>
               <p className="mt-1 text-sm text-ink-soft">
-                Maybe they&rsquo;re folding something for you.
+                Maybe they&rsquo;re folding something quiet for you right now.
               </p>
             </div>
           )}
@@ -440,3 +587,4 @@ function Home() {
     </div>
   );
 }
+

@@ -91,9 +91,21 @@ function SettingsPage() {
           <Row label="Partner" value={state.partner} />
           <Row label="Soul Code" value={state.soulCode} />
           <Row label="Connection" value="Paired · Private" />
+          <Row label="Status" value={state.isPartnerOnline ? "Partner is Online" : "Partner is Away"} />
         </Section>
 
-        <Section title="MEMORIES">
+        <Section title="FEELINGS & RESONANCE">
+          <Row label="Your current mood" value={`${state.myMood.emoji} ${state.myMood.label}`} />
+          <Row label={`${state.partner}'s mood`} value={`${state.partnerMood.emoji} ${state.partnerMood.label}`} />
+        </Section>
+
+        <Section title="MEMORIES & CONVERSATION">
+          <Link
+            to="/chat"
+            className="flex min-h-[56px] items-center justify-between py-3 text-sm text-ink"
+          >
+            Private 1-on-1 Chat <ChevronRight size={16} className="text-ink-soft" />
+          </Link>
           <Link
             to="/vault"
             className="flex min-h-[56px] items-center justify-between py-3 text-sm text-ink"
@@ -101,6 +113,7 @@ function SettingsPage() {
             Memory Vault <ChevronRight size={16} className="text-ink-soft" />
           </Link>
           <Row label="Capsule history" value={`${state.capsules.length} folded`} />
+          <Row label="Chat messages" value={`${state.messages.length} whispered`} />
         </Section>
 
         <Section title="ENVELOPE HISTORY">

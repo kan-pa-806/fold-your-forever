@@ -28,9 +28,17 @@ export function MemoryDetail({
         className="paper grain mx-auto mt-6 max-w-[360px] rounded-[26px] p-5 pb-8"
       >
         <div className="flex items-center justify-between">
-          <span className="text-[11px] tracking-[0.2em] text-ink-soft">
-            {formatDay(capsule.date)}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] tracking-[0.2em] text-ink-soft">
+              {formatDay(capsule.date)}
+            </span>
+            {capsule.mood ? (
+              <span className="glass inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] text-ink font-medium">
+                <span>{capsule.mood === "happy" ? "😊" : capsule.mood === "loved" ? "🥰" : capsule.mood === "calm" ? "😌" : capsule.mood === "sad" ? "😔" : capsule.mood === "angry" ? "😤" : "🤍"}</span>
+                <span className="capitalize">{capsule.mood}</span>
+              </span>
+            ) : null}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -40,6 +48,12 @@ export function MemoryDetail({
             <X size={16} />
           </button>
         </div>
+
+        {capsule.foldedFromChatId ? (
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-coral/15 px-3 py-1 text-[11px] text-coral font-medium">
+            <span>💌 Folded from our private whispers</span>
+          </div>
+        ) : null}
 
         {capsule.photo ? (
           <div className="paper mt-4 rotate-[-1.2deg] rounded-[8px] p-2 pb-10">

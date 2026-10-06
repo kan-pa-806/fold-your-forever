@@ -1,12 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, PenLine, Archive, Settings } from "lucide-react";
+import { Home, MessageCircleHeart, PenLine, Archive, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/", label: "Home", Icon: Home },
-  { to: "/create", label: "Create", Icon: PenLine },
+  { to: "/chat", label: "Chat", Icon: MessageCircleHeart },
+  { to: "/create", label: "Fold", Icon: PenLine },
   { to: "/vault", label: "Vault", Icon: Archive },
-  { to: "/settings", label: "Settings", Icon: Settings },
+  { to: "/settings", label: "Space", Icon: Settings },
 ] as const;
 
 export function BottomNavigation() {
