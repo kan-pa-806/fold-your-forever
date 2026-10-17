@@ -1,0 +1,64 @@
+{
+  "name": "11:Folds — Fold Your Forever",
+  "short_name": "11:Folds",
+  "description": "A private, intimate sanctuary for two souls. Capture whispers, fold letters, and play 20+ live couple games in real time.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "window-controls-overlay"],
+  "orientation": "portrait",
+  "background_color": "#FBF4EA",
+  "theme_color": "#FBF4EA",
+  "categories": ["lifestyle", "social", "entertainment"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Intimate Chat",
+      "short_name": "Chat",
+      "description": "Open private chat with your partner",
+      "url": "/chat",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "2-Player Games",
+      "short_name": "Games",
+      "description": "Play interactive couple mini-games",
+      "url": "/games",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Memory Vault",
+      "short_name": "Vault",
+      "description": "View saved letters and memory capsules",
+      "url": "/vault",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/create",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text"
+    }
+  }
+}

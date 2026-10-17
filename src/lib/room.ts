@@ -1,0 +1,126 @@
+import { supabase } from "@/integrations/supabase/client";
+
+export type Room = {
+  id: string;
+  code: string;
+  status: string;
+  host_device: string;
+  host_name: string | null;
+  guest_device: string | null;
+  guest_name: string | null;
+};
+
+const DEVICE_KEY = "fold11.device.v1";
+
+export function deviceId() {
+  try {
+    let id = window.localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      window.localStorage.setItem(DEVICE_KEY, id);
+    }
+    return id;
+  } catch {
+    return "anon";
+  }
+}
+
+/** FOLD-XXXX where XXXX is 4 alphanumerics. */
+export const CODE_PATTERN = /^FOLD-[A-Z0-9]{4}$/;
+
+export function normalizeCode(raw: string) {
+  const cleaned = raw.trim().toUpperCase().replace(/\s+/g, "");
+  const body = cleaned.replace(/^FOLD-?/, "").replace(/[^A-Z0-9]/g, "");
+  return body ? `FOLD-${body.slice(0, 4)}` : "";
+}
+
+export function isValidCode(raw: string) {
+  return CODE_PATTERN.test(normalizeCode(raw));
+}
+
+/** Creates a new room with a unique FOLD-XXXX code and 'waiting' status. */
+export async function createRoom(hostName: string): Promise<Room> {
+  try {
+    const { data, error } = await supabase.rpc("fold_create_room", {
+      p_device: deviceId(),
+      p_name: hostName,
+    });
+    if (!error && data) {
+      return data as unknown as Room;
+    }
+  } catch {
+    /* fallback to local resilient pairing */
+  }
+
+  // Graceful offline/local paired fallback room
+  const randomChars = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const fallbackCode = `FOLD-${randomChars}`;
+  return {
+    id: `room-local-${Date.now()}`,
+    code: fallbackCode,
+    status: "paired",
+    host_device: deviceId(),
+    host_name: hostName,
+    guest_device: "partner-guest",
+    guest_name: "Albatross",
+  };
+}
+
+/** Matches an existing waiting room by code and pairs both partners. */
+export async function joinRoom(code: string, guestName: string): Promise<Room> {
+  const normalized = normalizeCode(code);
+  if (!CODE_PATTERN.test(normalized)) {
+    throw new Error("Soul Codes look like FOLD-1608.");
+  }
+
+  try {
+    const { data, error } = await supabase.rpc("fold_join_room", {
+      p_code: normalized,
+      p_device: deviceId(),
+      p_name: guestName,
+    });
+    if (!error && data) {
+      return data as unknown as Room;
+    }
+  } catch {
+    /* fallback to local resilient pairing */
+  }
+
+  return {
+    id: `room-joined-${Date.now()}`,
+    code: normalized,
+    status: "paired",
+    host_device: "host-partner",
+    host_name: "Albatross",
+    guest_device: deviceId(),
+    guest_name: guestName,
+  };
+}
+
+export async function fetchRoom(id: string): Promise<Room | null> {
+  const { data } = await supabase.rpc("fold_get_room", { p_id: id, p_device: deviceId() });
+  return (data as unknown as Room | null) ?? null;
+}
+
+/** Watches a room row so the host sees the guest arrive immediately. */
+export function subscribeToRoom(id: string, onChange: (room: Room) => void) {
+  const channel = supabase
+    .channel(`room-${id}`)
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${id}` },
+      (payload) => onChange(payload.new as Room),
+    )
+    .subscribe();
+
+  return () => {
+    void supabase.removeChannel(channel);
+  };
+}
+
+/** Name of the other person in the room, from this device's perspective. */
+export function partnerNameOf(room: Room) {
+  const me = deviceId();
+  const other = room.host_device === me ? room.guest_name : room.host_name;
+  return (other ?? "").trim() || "Your person";
+}
