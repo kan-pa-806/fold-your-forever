@@ -90,17 +90,27 @@ export function UniversalLiveRoomHeader({
   isPartnerHere,
   onInvitePartner,
   onClose,
+  activeTurn = "me",
 }: {
   gameId: string;
   gameTitle: string;
   isPartnerHere: boolean;
   onInvitePartner: () => void;
   onClose?: () => void;
+  activeTurn?: "me" | "partner";
 }) {
   const state = useFold();
+  const isMyTurn = activeTurn === "me";
 
   return (
-    <div className="mb-3.5 overflow-hidden rounded-3xl border border-white/80 bg-white/90 p-3 shadow-device backdrop-blur-md">
+    <div
+      className={cn(
+        "mb-3.5 overflow-hidden rounded-3xl border p-3 shadow-device backdrop-blur-md transition-all duration-500 ease-in-out",
+        isMyTurn
+          ? "border-coral/50 bg-white/95 ring-2 ring-coral/30"
+          : "border-white/80 bg-white/85",
+      )}
+    >
       {/* Top row: Opponent/Partner profile & Live online status */}
       <div className="flex items-center justify-between gap-3">
         {/* Left: Partner Profile with bright green online dot (Plato layout) */}
@@ -190,7 +200,7 @@ export function UniversalLiveRoomHeader({
         </div>
       </div>
 
-      {/* Live sync banner badge */}
+      {/* Live sync banner badge & Dynamic Turn Indicator */}
       <div className="mt-2.5 flex items-center justify-between border-t border-ink/5 pt-2 text-[10px]">
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -198,9 +208,30 @@ export function UniversalLiveRoomHeader({
             Plato Live Room · {gameTitle}
           </span>
         </div>
-        <span className="rounded-full bg-coral/10 px-2 py-0.5 font-bold text-coral uppercase tracking-wider">
-          FAST REALTIME SYNC
-        </span>
+
+        <div className="flex items-center gap-2">
+          {/* Active Turn Indicator Badge */}
+          <span
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-tight shadow-xs transition-all duration-500 ease-in-out",
+              isMyTurn
+                ? "bg-gradient-to-r from-coral to-rose-500 text-white shadow-soft ring-2 ring-coral/25 animate-pulse"
+                : "bg-ink/10 text-ink-soft",
+            )}
+          >
+            <span
+              className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                isMyTurn ? "bg-white" : "bg-ink-soft/50",
+              )}
+            />
+            <span>{isMyTurn ? "✨ YOUR TURN TO PLAY" : `Waiting for ${state.partner}…`}</span>
+          </span>
+
+          <span className="hidden sm:inline-block rounded-full bg-coral/10 px-2 py-0.5 font-bold text-coral uppercase tracking-wider text-[9px]">
+            FAST REALTIME SYNC
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -2283,6 +2314,8 @@ export function CoupleGames({ initialGameId }: { initialGameId?: string } = {}) 
   );
 
   const selectedGameMeta = TWENTY_COUPLE_GAMES.find((g) => g.id === selectedGameId);
+  const currentTurn = selectedGameId ? gameTurns[selectedGameId] || "me" : "me";
+  const isMyTurn = currentTurn === "me";
 
   return (
     <div className="space-y-6">
@@ -2349,9 +2382,55 @@ export function CoupleGames({ initialGameId }: { initialGameId?: string } = {}) 
                 isPartnerHere={isPartnerInRoom}
                 onInvitePartner={handleNudgePartner}
                 onClose={() => setSelectedGameId(null)}
+                activeTurn={currentTurn}
               />
 
-              <div className="pb-24">
+              {/* Dynamic Turn Container with Smooth CSS Backdrop Transition */}
+              <div
+                className={cn(
+                  "relative rounded-[32px] p-2.5 sm:p-4 transition-all duration-700 ease-in-out pb-28",
+                  isMyTurn
+                    ? "bg-black/40 shadow-2xl backdrop-blur-md ring-1 ring-white/15"
+                    : "bg-transparent",
+                )}
+              >
+                {/* Subtle Ambient Glow Pill when it's your turn */}
+                <div
+                  className={cn(
+                    "mb-3 flex items-center justify-between rounded-2xl px-4 py-2 transition-all duration-700 ease-in-out",
+                    isMyTurn
+                      ? "bg-white/15 text-white backdrop-blur-md border border-white/20 shadow-soft"
+                      : "bg-white/40 text-ink-soft border border-white/50 opacity-70",
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "h-2 w-2 rounded-full transition-all duration-500",
+                        isMyTurn
+                          ? "bg-coral shadow-[0_0_8px_#FF6B6B] animate-ping"
+                          : "bg-ink-soft/40",
+                      )}
+                    />
+                    <span className="text-xs font-bold tracking-tight">
+                      {isMyTurn
+                        ? "✨ IT'S YOUR TURN — Tap the board to make your move!"
+                        : `⏳ Waiting for ${state.partner}'s turn…`}
+                    </span>
+                  </div>
+
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                      isMyTurn
+                        ? "bg-coral text-white shadow-soft"
+                        : "bg-ink/10 text-ink-soft",
+                    )}
+                  >
+                    {isMyTurn ? "Active Turn" : "Waiting"}
+                  </span>
+                </div>
+
                 {selectedGameId === "movie" && <MovieGuessingGame />}
                 {selectedGameId === "tictactoe" && <TicTacToeGame />}
                 {selectedGameId === "wheel" && <SpinTheWheelGame />}
